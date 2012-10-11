@@ -31,19 +31,19 @@ This is an extension of Lucene's [MultiPassIndexSplitter][2] that splits based o
 You'll end up with md5 sums for each of:
 
 ```javascript
-['190451837140044158302779253469716410810',
-    '154736196455933244638815998723571563529',
-    '228857960587141625483496904830786656907',
-    '244407972157904876700286015798136753977',
-    '248469930502121775991513712645312516144',
-    '323520551662003182321302873795880831432',
-    '88491575051939950596574576699976684']
+[190451837140044158302779253469716410810,
+    154736196455933244638815998723571563529,
+    228857960587141625483496904830786656907,
+    244407972157904876700286015798136753977,
+    248469930502121775991513712645312516144,
+    323520551662003182321302873795880831432,
+    88491575051939950596574576699976684]
 ```
 
 Mod 4 for each gives us:
 
 ```javascript
-[2,1,3,1,0,0,0]
+[2, 1, 3, 1, 0, 0, 0]
 ```
 
 ...which means you'll end up with 3 documents in shard0, 2 in shard1, 1 in shard2, and 2 in shard3.  The original index is not modified.
@@ -71,7 +71,7 @@ The shards will be named part0, part1, part2, and part3.
 Generate shards from document IDs
 =========
 
-For reference, you can figure out the right shard for a document using valid md5 hashes of the UTF8 string id using your favorite language like this:
+For reference, here's how you can generate valid shard numbers in different languages:
 
 Java:
 ```java
