@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.hon.lucene.hashbasedindexsplitter</groupId>
 	<artifactId>hash-based-index-splitter</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>Hash Based Index Splitter</name>
 	<description>Tool for splitting a Lucene index based on the hash of the document id mod the number of shards.</description>
 	<dependencies>
