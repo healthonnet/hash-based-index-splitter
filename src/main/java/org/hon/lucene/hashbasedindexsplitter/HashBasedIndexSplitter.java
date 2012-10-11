@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.FieldSelector;
+import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.FilterIndexReader;
 import org.apache.lucene.index.IndexReader;
@@ -63,15 +66,18 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
         input = new FakeDeleteIndexReader(input);
         int maxDoc = input.maxDoc();
         int partLen = maxDoc / numParts;
+        // assume that the id is called "id"
+        FieldSelector fieldSelector = new SetBasedFieldSelector(
+                Collections.singleton("id"),
+                Collections.<String>emptySet());
         for (int i = 0; i < numParts; i++) {
             int count = 0;
             input.undeleteAll();
 
             // hash-based round-robin
             for (int j = 0; j < maxDoc; j++) {
-                Document document = input.document(j);
-                String id = document.get("id"); // assumed that the id is
-                                                    // called "id"
+                Document document = input.document(j, fieldSelector);
+                String id = document.get("id");
                 BigInteger hash = new BigInteger(DigestUtils.md5Hex(id.getBytes("UTF-8")), 16);
                 if (hash.mod(BigInteger.valueOf(numParts)).intValue() != i) {
                     input.deleteDocument(j);
@@ -81,7 +87,7 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
             }
             IndexWriter w = new IndexWriter(outputs[i], new IndexWriterConfig(version, new WhitespaceAnalyzer(
                     Version.LUCENE_CURRENT)).setOpenMode(OpenMode.CREATE));
-            System.err.println("Writing " + count + " documents to part " + (i + 1) + " ...");
+            System.err.println("Writing " + count + " document(s) to part " + (i + 1) + " ...");
             w.addIndexes(input);
             w.close();
         }
@@ -98,11 +104,10 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
     public static void main(String[] args) throws Exception {
         if (args.length < 5) {
             System.err
-                    .println("Usage: MultiPassIndexSplitter -out <outputDir> -num <numParts> [-seq] <inputIndex1> [<inputIndex2 ...]");
+                    .println("Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-seq] <inputIndex1> [<inputIndex2 ...]");
             System.err.println("\tinputIndex\tpath to input index, multiple values are ok");
             System.err.println("\t-out ouputDir\tpath to output directory to contain partial indexes");
             System.err.println("\t-num numParts\tnumber of parts to produce");
-            System.err.println("\t-seq\tsequential docid-range split (default is round-robin)");
             System.exit(-1);
         }
         ArrayList<IndexReader> indexes = new ArrayList<IndexReader>();
