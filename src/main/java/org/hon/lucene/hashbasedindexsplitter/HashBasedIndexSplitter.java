@@ -70,28 +70,47 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
         FieldSelector fieldSelector = new SetBasedFieldSelector(
                 Collections.singleton("id"),
                 Collections.<String>emptySet());
+        
+        
+        short[] shardHashes = new short[maxDoc];
+        System.err.println("Generating shard hashes...");
+        for (int i = 0; i < maxDoc; i++) {
+            Document document = input.document(i, fieldSelector);
+            String id = document.get("id");
+            BigInteger hash = new BigInteger(DigestUtils.md5Hex(id.getBytes("UTF-8")), 16);
+            shardHashes[i] = hash.mod(BigInteger.valueOf(numParts)).shortValue();
+            ProgressBar.printProgBar((int)((100.0 * i) / maxDoc));
+        }
+        ProgressBar.printProgBar(100);
+        System.err.println("\nGenerated hashes.");
+        
         for (int i = 0; i < numParts; i++) {
+            System.err.println("\nGenerating documents for shard " + (i + 1) + " of " + numParts + "...");
             int count = 0;
             input.undeleteAll();
 
             // hash-based round-robin
             for (int j = 0; j < maxDoc; j++) {
-                Document document = input.document(j, fieldSelector);
-                String id = document.get("id");
-                BigInteger hash = new BigInteger(DigestUtils.md5Hex(id.getBytes("UTF-8")), 16);
-                if (hash.mod(BigInteger.valueOf(numParts)).intValue() != i) {
+                if (shardHashes[j] != i) {
                     input.deleteDocument(j);
                 } else {
                     count++;
                 }
+                ProgressBar.printProgBar((int)((100.0 * j) / maxDoc));
             }
+            ProgressBar.printProgBar(100);
+            System.err.println("\nWriting " + count + " document(s) to shard " + (i + 1) + "...");
+            
             IndexWriter w = new IndexWriter(outputs[i], new IndexWriterConfig(version, new WhitespaceAnalyzer(
                     Version.LUCENE_CURRENT)).setOpenMode(OpenMode.CREATE));
-            System.err.println("Writing " + count + " document(s) to part " + (i + 1) + " ...");
             w.addIndexes(input);
             w.close();
+            
+            System.err.println("Wrote to shard " + (i + 1) + ".");
+            
         }
-        System.err.println("Done.");
+        
+        System.err.println("\nDone.");
     }
 
     /**
