@@ -88,7 +88,6 @@ Writing 1 document(s) to shard 4...
 Wrote to shard 4.
 
 Done.
-
 ```
 
 The shards will be named part0, part1, part2, and part3.
