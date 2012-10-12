@@ -113,7 +113,7 @@ use Encode qw(encode_utf8);
 
 sub getShard {
     my ($id, $numShards) = @_;
-    return hex(md5_hex(encode_utf8($id))) % $numShards;
+    return (hex(md5_hex(encode_utf8($id))) % $numShards)->numify();
 }
 ```
 
