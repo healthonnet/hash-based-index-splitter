@@ -52,8 +52,8 @@ Usage
 ========
 
 ```
-wget 'https://github.com/downloads/HON-Khresmoi/hash-based-index-splitter/hash-based-index-splitter-1.0.jar'
-java -Xmx1G -jar hash-based-index-splitter-1.0.jar -out /path/to/my/output -num 4 /path/to/my/index
+wget 'https://github.com/downloads/HON-Khresmoi/hash-based-index-splitter/hash-based-index-splitter-1.0.1.jar'
+java -Xmx1G -jar hash-based-index-splitter-1.0.1.jar -out /path/to/my/output -num 4 /path/to/my/index
 ```
 
 This will write 4 shards to /path/to/my/output:
