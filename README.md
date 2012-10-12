@@ -50,7 +50,7 @@ Modulo 4 for each gives us:
 [2, 1, 3, 1, 0, 0, 0]
 ```
 
-...which means you'll end up with 3 documents in shard #0, 2 in shard #1, 1 in shard #2, and 2 in shard #3.
+...which means you'll end up with 3 documents in shard #0, 2 in shard #1, 1 in shard #2, and 1 in shard #3.
 
 Usage
 ========
