@@ -97,7 +97,7 @@ It is assumed that your unique ID field is called "id".  If this is not the case
 Full usage:
 
 ```
-Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-idField idField] <inputIndex1> [<inputIndex2 ...]
+java -Xmx1G -jar hash-based-index-splitter-1.0.2.jar -out <outputDir> -num <numParts> [-idField idField] <inputIndex1> [<inputIndex2 ...]
 	inputIndex        path to input index, multiple values are ok
 	-out ouputDir     path to output directory to contain partial indexes
 	-num numParts     number of parts to produce
