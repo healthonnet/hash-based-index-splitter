@@ -11,7 +11,7 @@ License
 
 Overview
 ========
-When an index in Lucene/Solr gets too large and your queries get too slow, you'll need to split your index into "shards" which can be separately queried and combined. [The Lucene/Solr docs][3] recommend that you split up your index using a function like this:
+When an index in Lucene/Solr gets too large and your queries get too slow, you need to split your index into "shards" which can be separately queried and combined. [The Lucene/Solr docs][3] recommend that you split up your index using a function like this:
 
 ```javascript
 document.uniqueId.hashCode() % numShards
@@ -50,7 +50,7 @@ Modulo 4 for each gives us:
 [2, 1, 3, 1, 0, 0, 0]
 ```
 
-...which means you'll end up with 3 documents in shard #0, 2 in shard #1, 1 in shard #2, and 2 in shard #3.  The original index is not modified.
+...which means you'll end up with 3 documents in shard #0, 2 in shard #1, 1 in shard #2, and 2 in shard #3.
 
 Usage
 ========
@@ -93,7 +93,7 @@ Done.
 
 The shards will be named part0, part1, part2, and part3.
 
-It is assumed that your unique ID field is called "id".  If this is not the case, use the -idField param.
+It is assumed that your unique ID field is called "id".  If this is not the case, use the -idField parameter.
 
 Full usage:
 
@@ -108,7 +108,7 @@ Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-idField idField
 Generate shards from document IDs
 =========
 
-For reference, here's how you can generate valid md5-based shard numbers in different languages:
+Here's how you can generate valid md5-based shard numbers in your favorite language:
 
 Java:
 ```java
