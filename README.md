@@ -11,9 +11,13 @@ License
 
 Overview
 ========
-When an index in Lucene/Solr gets too large, you need to split it into "shards" which can be separately queried and combined. [The Lucene/Solr docs][3] recommend that you split up your index based on the document's ID's hash mod the number of shards.
+When an index in Lucene/Solr gets too large and your queries get too slow, you'll need to split your index into "shards" which can be separately queried and combined. [The Lucene/Solr docs][3] recommend that you split up your index using a function like this:
 
-Well, that works fine at indexing time, but what if you already have a large index that you want to split up?  This utility can help you out.
+```javascript
+document.uniqueId.hashCode() % numShards
+``` 
+
+Well, that's fine if you're starting from scratch, but what if you already have an index that you want to split up?  This utility can help you out.
 
 This is an extension of Lucene's [MultiPassIndexSplitter][2] that splits based on the md5sum of each document's id, mod the number of shards.  So for instance, say you want to split your index into 4 shards, and you have the following document IDs in your index:
 
@@ -28,7 +32,7 @@ This is an extension of Lucene's [MultiPassIndexSplitter][2] that splits based o
 
 ```
 
-You'll end up with md5 sums for each of:
+You'll end up with md5 sums of:
 
 ```javascript
 [190451837140044158302779253469716410810,
@@ -40,20 +44,20 @@ You'll end up with md5 sums for each of:
     88491575051939950596574576699976684]
 ```
 
-Mod 4 for each gives us:
+Modulo 4 for each gives us:
 
 ```javascript
 [2, 1, 3, 1, 0, 0, 0]
 ```
 
-...which means you'll end up with 3 documents in shard0, 2 in shard1, 1 in shard2, and 2 in shard3.  The original index is not modified.
+...which means you'll end up with 3 documents in shard #0, 2 in shard #1, 1 in shard #2, and 2 in shard #3.  The original index is not modified.
 
 Usage
 ========
 
 ```
-wget 'https://github.com/downloads/HON-Khresmoi/hash-based-index-splitter/hash-based-index-splitter-1.0.1.jar'
-java -Xmx1G -jar hash-based-index-splitter-1.0.1.jar -out /path/to/my/output -num 4 /path/to/my/index
+wget 'https://github.com/downloads/HON-Khresmoi/hash-based-index-splitter/hash-based-index-splitter-1.0.2.jar'
+java -Xmx1G -jar hash-based-index-splitter-1.0.2.jar -out /path/to/my/output -num 4 /path/to/my/index
 ```
 
 This will write 4 shards to /path/to/my/output:
@@ -89,10 +93,22 @@ Done.
 
 The shards will be named part0, part1, part2, and part3.
 
+It is assumed that your unique ID field is called "id".  If this is not the case, use the -idField param.
+
+Full usage:
+
+```
+Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-idField idField] <inputIndex1> [<inputIndex2 ...]
+	inputIndex        path to input index, multiple values are ok
+	-out ouputDir     path to output directory to contain partial indexes
+	-num numParts     number of parts to produce
+	-idField idField  unique ID field name ("id" by default)
+```
+
 Generate shards from document IDs
 =========
 
-For reference, here's how you can generate valid shard numbers in different languages:
+For reference, here's how you can generate valid md5-based shard numbers in different languages:
 
 Java:
 ```java
@@ -135,8 +151,6 @@ Simply run:
 ```
 mvn assembly:single
 ````
-
-Note: this project assumes that your ID field is called "id".
 
 [1]: http://www.apache.org/licenses/LICENSE-2.0.html
 [2]: http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/api/all/org/apache/lucene/index/MultiPassIndexSplitter.html

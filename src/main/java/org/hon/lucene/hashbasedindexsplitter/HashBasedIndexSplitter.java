@@ -51,7 +51,8 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
      *            fashion to one of the output splits.
      * @throws IOException
      */
-    public void split(Version version, IndexReader input, Directory[] outputs, boolean seq) throws IOException {
+    @SuppressWarnings("deprecation")
+    public void split(Version version, IndexReader input, Directory[] outputs, String idField) throws IOException {
         if (outputs == null || outputs.length < 2) {
             throw new IOException("Invalid number of outputs.");
         }
@@ -66,9 +67,8 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
         input = new FakeDeleteIndexReader(input);
         int maxDoc = input.maxDoc();
         int partLen = maxDoc / numParts;
-        // assume that the id is called "id"
         FieldSelector fieldSelector = new SetBasedFieldSelector(
-                Collections.singleton("id"),
+                Collections.singleton(idField),
                 Collections.<String>emptySet());
         
         
@@ -76,7 +76,11 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
         System.err.println("Generating shard hashes...");
         for (int i = 0; i < maxDoc; i++) {
             Document document = input.document(i, fieldSelector);
-            String id = document.get("id");
+            String id = document.get(idField);
+            if (id == null) {
+                throw new IllegalArgumentException("Null or nonexistent document field: '" + idField +"'. " +
+                		"Set the correct unique ID using [-idField idField].");
+            }
             BigInteger hash = new BigInteger(DigestUtils.md5Hex(id.getBytes("UTF-8")), 16);
             shardHashes[i] = hash.mod(BigInteger.valueOf(numParts)).shortValue();
             ProgressBar.printProgBar((int)((100.0 * i) / maxDoc));
@@ -123,23 +127,24 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
     public static void main(String[] args) throws Exception {
         if (args.length < 5) {
             System.err
-                    .println("Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-seq] <inputIndex1> [<inputIndex2 ...]");
-            System.err.println("\tinputIndex\tpath to input index, multiple values are ok");
-            System.err.println("\t-out ouputDir\tpath to output directory to contain partial indexes");
-            System.err.println("\t-num numParts\tnumber of parts to produce");
+                    .println("Usage: HashBasedIndexSplitter -out <outputDir> -num <numParts> [-idField idField] <inputIndex1> [<inputIndex2 ...]");
+            System.err.println("\tinputIndex        path to input index, multiple values are ok");
+            System.err.println("\t-out ouputDir     path to output directory to contain partial indexes");
+            System.err.println("\t-num numParts     number of parts to produce");
+            System.err.println("\t-idField idField  unique ID field name (\"id\" by default)");
             System.exit(-1);
         }
         ArrayList<IndexReader> indexes = new ArrayList<IndexReader>();
         String outDir = null;
         int numParts = -1;
-        boolean seq = false;
+        String idField = "id"; // assumed by default that the id field is called "id"
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-out")) {
                 outDir = args[++i];
             } else if (args[i].equals("-num")) {
                 numParts = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("-seq")) {
-                seq = true;
+            } else if (args[i].equals("-idField")) {
+                idField = args[++i];
             } else {
                 File file = new File(args[i]);
                 if (!file.exists() || !file.isDirectory()) {
@@ -183,7 +188,7 @@ public class HashBasedIndexSplitter extends MultiPassIndexSplitter {
         } else {
             input = new MultiReader(indexes.toArray(new IndexReader[indexes.size()]));
         }
-        splitter.split(Version.LUCENE_CURRENT, input, dirs, seq);
+        splitter.split(Version.LUCENE_CURRENT, input, dirs, idField);
     }
 
     /**
