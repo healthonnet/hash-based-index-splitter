@@ -56,7 +56,7 @@ Usage
 ========
 
 ```
-wget 'https://github.com/downloads/HON-Khresmoi/hash-based-index-splitter/hash-based-index-splitter-1.0.2.jar'
+wget 'https://github.com/downloads/healthonnet/hash-based-index-splitter/hash-based-index-splitter-1.0.2.jar'
 java -Xmx1G -jar hash-based-index-splitter-1.0.2.jar -out /path/to/my/output -num 4 /path/to/my/index
 ```
 
