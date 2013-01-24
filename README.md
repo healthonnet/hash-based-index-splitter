@@ -55,8 +55,9 @@ Modulo 4 for each gives us:
 Usage
 ========
 
+Download [hash-based-index-splitter-1.0.2.jar][4] and run the following:
+
 ```
-wget 'https://github.com/downloads/healthonnet/hash-based-index-splitter/hash-based-index-splitter-1.0.2.jar'
 java -Xmx1G -jar hash-based-index-splitter-1.0.2.jar -out /path/to/my/output -num 4 /path/to/my/index
 ```
 
@@ -154,3 +155,4 @@ mvn assembly:single
 [1]: http://www.apache.org/licenses/LICENSE-2.0.html
 [2]: http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/api/all/org/apache/lucene/index/MultiPassIndexSplitter.html
 [3]: http://wiki.apache.org/solr/DistributedSearch
+[4]: http://nolanlawson.s3.amazonaws.com/dist/org.healthonnet.lucene.hashbasedindexsplitter/release/1.0.2/hash-based-index-splitter-1.0.2.jar
